@@ -1,3 +1,4 @@
+# Clair Dev
 This sample app loads a model exported from Teachable Machine. 
 It loads a simple screen to test the model using images from the phone's album.
 
@@ -25,18 +26,21 @@ Steps I folowed...
 	3. Tflite
 		- Runner -> workspace file -> targets -> build settings -> compile source as: Objective-C++
 
-	4.Permissions for image picker/microphone/camera
+	4. Permissions for image picker/microphone/camera
 		- iOS -> Runner folder -> info.plist
+		```
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>This app requires permission to access photo library</string>
 		<key>NSCameraUsageDescription</key>
 		<string>This app requires permission to access camera</string>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>This app requires permission to access microphone</string>
+		```
 		
 
 - Android
 	1. app -> build grade
+		```
 		android {
 			…
 			aaptOptions {
@@ -44,4 +48,5 @@ Steps I folowed...
         				noCompress "lite"
     			}
 		}
+		```
 	
