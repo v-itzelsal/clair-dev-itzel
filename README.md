@@ -1,4 +1,4 @@
-clair-dev-itzel
+clair-dev-itzel \n
 This sample app loads a model exported from Teachable Machine. 
 It loads a simple screen to test the model using images from the phone's album.
 
