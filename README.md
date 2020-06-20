@@ -5,28 +5,28 @@ Steps I folowed...
 
 - pubspec.yaml
 	1. Dependencies
-		tflite: any
- 		image_picker: ^0.6.7+2. (Look for latest version on flutter’s doc)
+		- tflite: any
+ 		- image_picker: ^0.6.7+2. (Look for latest version on flutter’s doc)
 
 	2. Assets
-		Uncomment assets under flutter:
-		Add - assets/
+		- Uncomment assets under flutter:
+		- Add - assets/
 
 - iOS Deployment
 
 	1. Install pods 
-		sudo gem install cocoapods
-		pod setup
+		- sudo gem install cocoapods
+		- pod setup
 
 	2. Modify podfile
-		Uncomment second line
-		platform :ios, '9.0'
+		- Uncomment second line
+		- platform :ios, '9.0'
 
 	3. Tflite
-		Runner -> workspace file -> targets -> build settings -> compile source as: Objective-C++
+		- Runner -> workspace file -> targets -> build settings -> compile source as: Objective-C++
 
 	4.Permissions for image picker/microphone/camera
-		iOS -> Runner folder -> info.plist
+		- iOS -> Runner folder -> info.plist
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>This app requires permission to access photo library</string>
 		<key>NSCameraUsageDescription</key>
