@@ -44,8 +44,8 @@ Steps I folowed...
 		android {
 			…
 			aaptOptions {
-        				noCompress "tflite"
-        				noCompress "lite"
+        			noCompress "tflite"
+        			noCompress "lite"
     			}
 		}
 		```
