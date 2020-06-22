@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'debug/logging.dart';
 import 'package:camera/camera.dart';
 import 'package:tflite/tflite.dart';
 import 'package:flutter/material.dart';
+
 
 List<CameraDescription> cameras = [];
 Future<void> main() async {
@@ -10,7 +12,7 @@ Future<void> main() async {
     WidgetsFlutterBinding.ensureInitialized();
     cameras = await availableCameras();
   } on CameraException catch (e) {
-    //logError(e.code, e.description);
+    logError(e.code, e.description);
   }
   runApp(ClairApp());
 }
@@ -51,7 +53,7 @@ class _ClairHomePageState extends State<ClairHomePage> {
   List outputs = List();
 
   //Text
-  
+  var outputText = 'none';
 
   @override
   void initState() {
@@ -110,7 +112,7 @@ class _ClairHomePageState extends State<ClairHomePage> {
                           )
                   )
               ),
-              !isDetecting ? Container(
+              outputText == 'none' ? Container(
                 alignment: Alignment.center,
                 child: Center(
                   child: new Text("Loading...", textDirection: TextDirection.ltr),
@@ -123,9 +125,7 @@ class _ClairHomePageState extends State<ClairHomePage> {
                       outputs == null ? Text(""): 
                         Column(
                           children: <Widget>[
-                            Text("${outputs[0]["label"]}"),
-                            SizedBox(height:8,),
-                            Text("${outputs[0]["confidence"]}")
+                            Text(outputText)
                           ]// children
                         )//Column
                   ]// children
@@ -136,14 +136,13 @@ class _ClairHomePageState extends State<ClairHomePage> {
     );
   }
 
-
-
   classifyImage() async{
     controller.startImageStream((CameraImage image) {
         if (!isModelLoaded) return;
         if(!isDetecting){
           try {
             runModelOnImage(image);
+            getTextOutput();
           } catch (e) {
             print(e);
           }
@@ -151,6 +150,28 @@ class _ClairHomePageState extends State<ClairHomePage> {
         isDetecting = false;
     });
     
+  }
+
+  getTextOutput(){
+    var output = '';
+    var newText = outputText;
+    try{
+      var label = outputs[0]["label"].toString();
+      output = label[label.length-1];
+      if(newText == 'none'){
+        newText = output;
+      }
+      else{
+        if(output != outputText[outputText.length-1])
+          newText = newText + output;
+      }
+    }catch (e) {
+      print(e);
+    }
+
+    setState(() {
+      outputText = newText;
+    });
   }
 
   runModelOnImage(CameraImage image) async{
