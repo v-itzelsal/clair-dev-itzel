@@ -54,28 +54,13 @@ class _ClairHomePageState extends State<ClairHomePage> {
 
   //Text
   var outputText = 'none';
+  bool updateText = true;
 
   @override
   void initState() {
     super.initState();
-
-    isModelLoaded = false;
-
-    loadModel().then((value){
-      setState((){
-        isModelLoaded = true;
-      });
-    });
-
-    controller = CameraController(cameras.last, ResolutionPreset.medium);
-    controller.initialize().then((_) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {});
-      classifyImage();
-    });
-
+    initializeModel();
+    initializeCamera();
   }
 
   @override
@@ -112,30 +97,51 @@ class _ClairHomePageState extends State<ClairHomePage> {
                           )
                   )
               ),
-              outputText == 'none' ? Container(
-                alignment: Alignment.center,
-                child: Center(
-                  child: new Text("Loading...", textDirection: TextDirection.ltr),
+              const SizedBox(height: 30),
+              outputText == 'none' ? 
+                Container(
+                  alignment: Alignment.center,
+                  child: Center(
+                    child: new Text("Loading...", textDirection: TextDirection.ltr),
+                  ),
+                ) : Container(
+                  child: Text(outputText,textDirection: TextDirection.ltr),
                 ),
-              ) : Container(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                      outputs == null ? Text(""): 
-                        Column(
-                          children: <Widget>[
-                            Text(outputText)
-                          ]// children
-                        )//Column
-                  ]// children
-              ),//Column
-            )
+              const SizedBox(height: 30),
+              RaisedButton(
+                onPressed: () { 
+                  setState(() {
+                    updateText = false;
+                  });},
+                child: const Text("I'm done", style: TextStyle(fontSize: 20)),
+                                    
+              ),
           ],),
         )
     );
   }
 
+  initializeModel(){
+
+    loadModel().then((value){
+      setState((){
+        isModelLoaded = true;
+      });
+    });
+  }
+
+  initializeCamera(){
+    controller = CameraController(cameras.last, ResolutionPreset.medium);
+    controller.initialize().then((_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {});
+      classifyImage();
+    });
+  }
+
+  // Starts streaming and call the model to detect images
   classifyImage() async{
     controller.startImageStream((CameraImage image) {
         if (!isModelLoaded) return;
@@ -152,16 +158,24 @@ class _ClairHomePageState extends State<ClairHomePage> {
     
   }
 
+  //Appends new letter to final word
   getTextOutput(){
     var output = '';
     var newText = outputText;
+    if(!updateText) return;
+
     try{
+      // Get label from model
+      // Parsing to string. Original format index, result [0A]
       var label = outputs[0]["label"].toString();
       output = label[label.length-1];
       if(newText == 'none'){
         newText = output;
       }
       else{
+        // Avoids repeating letters
+        // I wanted to avoid this output: aaaaaaaaaccccccc
+        // However, we can improve this by predicting words. Not for Amir's submission
         if(output != outputText[outputText.length-1])
           newText = newText + output;
       }
@@ -169,11 +183,13 @@ class _ClairHomePageState extends State<ClairHomePage> {
       print(e);
     }
 
+    //Update the state to render new value
     setState(() {
       outputText = newText;
     });
   }
 
+  //Runs every frame
   runModelOnImage(CameraImage image) async{
     var recognitions = await Tflite.runModelOnFrame(
         bytesList: image.planes.map((plane) {return plane.bytes;}).toList(),// required
@@ -186,13 +202,13 @@ class _ClairHomePageState extends State<ClairHomePage> {
         threshold: 0.1,     // defaults to 0.1
         asynch: true        // defaults to true
     );
-
+    // Update outputs list with recognition results
     setState(() {
       isDetecting = true;
       outputs = recognitions;
     });
   }
-
+  //Loading model resources
   loadModel() async{
     await Tflite.loadModel(
         model: "assets/model_unquant.tflite",
